@@ -1,7 +1,24 @@
 import './style.css'
 
+//TODO 
+/**
+ * list that contains 6 different moon divs
+ * 
+ * function takes users location based off of lat and long and returns users'
+ * current visible moon
+ * 
+ * API calls to ^ get the moon position, I want to grab celestial body positions as well.
+ * 
+ * a function and constant to change the font color as well.
+ */
+
+
+
 // --- Lerp helper ---
 // Blends from `begin` to `end` based on t (0.0 = begin, 1.0 = end)
+ let lastScroll = 0;
+
+
 function lerp(begin, end, t) {
   return begin + (end - begin) * t;
 }
@@ -26,6 +43,36 @@ const SKY_COLORS = {
   twilight: { r: 62,  g: 98,  b: 148 },  // --Twilight
   midnight: { r: 38,  g: 40,  b: 64  },  // --Midnight  (#262840)
 };
+
+const FONT_COLORS = {
+  day:   { r: 62,  g: 98,  b: 148 },  // --Twilight
+  night: { r: 208, g: 255, b: 196 },  // --Morning
+}
+
+const GLOW_COLORS = {
+  day:   { r: 100, g: 140, b: 190  },  // --morning-glow
+  night: { r: 255, g: 255, b: 255 },  // --night-glow
+}
+
+//moon
+const moonEl = document.createElement('div');
+moonEl.classList.add('moon-full');
+
+// moon craters
+const moonC_1 = document.createElement('div');
+moonC_1.classList.add('mooncrater-1-full');
+const moonC_2 = document.createElement('div');
+moonC_2.classList.add('mooncrater-2-full');
+const moonC_3 = document.createElement('div');
+moonC_3.classList.add('mooncrater-3-full');
+
+
+moonEl.appendChild(moonC_1);
+moonEl.appendChild(moonC_2);
+moonEl.appendChild(moonC_3);
+
+
+document.body.appendChild(moonEl);
 
 // --- Sun position math ---
 // Returns { x, y, visible } based on current real-world time
@@ -66,7 +113,6 @@ function getSunPosition() {
 function getMoonPosition(){
   const now = new Date();
 
-  // bug 1: stray semicolon broke the expression, bug 2: const can't be reassigned, bug 3: getSeconds missing ()
   let hours = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
 
   // shift 0-6am into 24-30 range so the arc is continuous across midnight
@@ -114,6 +160,17 @@ function getSkyColor(hours) {
   return SKY_COLORS.midnight;
 }
 
+// --- font color based on time ---
+function getFontColor(hours){
+  if (hours > 18 || hours < 6) return FONT_COLORS.night;
+  return FONT_COLORS.day;
+}
+
+function getGlowColor(hours){
+  if (hours > 18 || hours < 6) return GLOW_COLORS.night;
+  return GLOW_COLORS.day;
+}
+
 // --- DOM setup ---
 
 
@@ -135,37 +192,6 @@ for(let i = 0; i < 4; i++){
 
 document.body.appendChild(sunEl);
 
-//moon
-const moonEl = document.createElement('div');
-moonEl.classList.add('moon-full');
-
-// moon craters
-const moonC_1 = document.createElement('div');
-moonC_1.classList.add('mooncrater-1-full');
-const moonC_2 = document.createElement('div');
-moonC_2.classList.add('mooncrater-2-full');
-const moonC_3 = document.createElement('div');
-moonC_3.classList.add('mooncrater-3-full');
-
-
-moonEl.appendChild(moonC_1);
-moonEl.appendChild(moonC_2);
-moonEl.appendChild(moonC_3);
-
-document.body.appendChild(moonEl);
-
-
-
-
-
-
-
-//TODO 
-/**
- * Function that contains 6 different moons
- * takes users location based off of lat and long and returns users'
- * current visible moon!
- */
 
 function DayNightCycle() {
   const { x_s, y_s, visible_s } = getSunPosition();
@@ -186,8 +212,28 @@ function DayNightCycle() {
   // Shift sky color
   const sky = getSkyColor(hours);
   document.body.style.backgroundColor = `rgb(${sky.r}, ${sky.g}, ${sky.b})`;
+
+  // Shift nav font and glow colors
+  const fontCol = getFontColor(hours);
+  const glowCol = getGlowColor(hours);
+  const root = document.documentElement;
+  root.style.setProperty('--nav-font-color', `rgb(${fontCol.r}, ${fontCol.g}, ${fontCol.b})`);
+  root.style.setProperty('--nav-glow-color', `rgb(${glowCol.r}, ${glowCol.g}, ${glowCol.b})`);
+
+
 }
 
+  window.addEventListener('scroll', () => {
+    const current = window.scrollY;
+
+    if (current > lastScroll) {
+      document.querySelector('nav').classList.add('hidden');    // scrolling down
+    } else {
+      document.querySelector('nav').classList.remove('hidden'); // scrolling up
+    }
+
+    lastScroll = current;
+  });
 
 window.addEventListener("load", () => {
   DayNightCycle();

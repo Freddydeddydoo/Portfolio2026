@@ -1,5 +1,5 @@
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: MuseoModerno, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -18,6 +18,20 @@
   --Midnight : rgb(38, 40, 64);
 
 
+  /* Colors for the fonts  */
+  --Morning-text:  var(--Twilight);
+  --Midday-text:   var(--Twilight);
+  --Twilight-text: var(--Morning);
+  --Midnight-text: var(--Morning);
+
+
+  /* navbar glow
+    only here for anyone else to know what color I used
+    doesn't do anything lol
+  */
+  --night-glow: rgb(255,255,255);
+  --morning-glow: rgb(100, 140, 190);
+
   /*
   hex colors for the moon
   Separate varaiable cause what if I wanted to change it?
@@ -34,11 +48,16 @@
 
 }
 
+section {
+  position: relative;
+  z-index: 1;
+}
+
 
 body{
   height: 100vh;
   margin: 0;
-  overflow: hidden;
+  overflow: auto;
   background-color: var(--Morning);
   transition: background-color 2s ease;
 }
@@ -48,6 +67,8 @@ body{
   width: 60px;
   height: 60px;
   border-radius: 50%;
+
+  z-index: 0;
 
   background: rgba(255, 255, 255, 1);
   box-shadow:
@@ -62,7 +83,6 @@ body{
   /* Smooth position updates every second */
   transition: left 0.1s linear, top 0.1s linear, opacity 1s ease;
 }
-
 
 
 .ray{
@@ -100,6 +120,7 @@ body{
   height: 60px;
   border-radius: 50%;
   background: var(--Mlight);
+  z-index: 0;
 
    filter: drop-shadow(0 0 30px rgba(237, 247, 150, 0.4));
 
@@ -160,4 +181,49 @@ body{
   top: 30px;
   left: 18px;
 
+}
+
+nav{
+ display: flex;
+ gap: 2rem;
+ padding: 1rem 2rem;
+ font-size: x-large;
+ height: 35px;
+
+}
+
+
+nav a:first-child{
+  margin-right: auto;
+}
+
+nav a {
+  color: var(--nav-font-color);
+  text-decoration: none;
+  font-weight: 600;
+  position: relative;
+}
+
+
+nav a::after{
+  content: '';
+  position: absolute;
+  left: 0%;
+  top: 100%;
+  height: 1px;
+  width: 100%;
+  background: var(--nav-glow-color);
+}
+
+nav a:hover::after{
+  box-shadow: 0 0 5px 3px var(--nav-glow-color);
+  height: 0%;
+}
+
+nav a:active{
+  width: 50%;
+}
+nav a:active::after{
+  left: 25%;
+  width: 50%;
 }
