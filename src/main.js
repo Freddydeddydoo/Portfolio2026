@@ -33,8 +33,12 @@ function lerpColor(c1, c2, t) {
 }
 
 // --- Time of day constants ---
-const SUNRISE = 6;   // 6:00 AM
-const SUNSET  = 18;  // 6:00 PM
+let SUNRISE = 6;   // 6:00 AM
+let SUNSET  = 18;  // 6:00 PM
+
+const Daylight = SUNSET- SUNRISE;
+const Nightlight = 24 - Daylight;
+
 
 // Sky colors at each phase (matching your CSS vars)
 const SKY_COLORS = {
@@ -84,7 +88,7 @@ function getSunPosition() {
 
 
   // 0.0 = sunrise, 0.5 = noon, 1.0 = sunset
-  const progress = (hours - SUNRISE) / (SUNSET - SUNRISE);
+  const progress = (hours - SUNRISE) / Daylight;
   const visible_s  = progress >= 0 && progress <= 1;
 
   // Clamp so the sun sits at the horizon when below 0 or above 1
@@ -116,12 +120,12 @@ function getMoonPosition(){
   let hours = now.getHours() + now.getMinutes() / 60 + now.getSeconds() / 3600;
 
   // shift 0-6am into 24-30 range so the arc is continuous across midnight
-  if(hours >= 0 && hours < 6){
+  if(hours >= 0 && hours < SUNRISE){
     hours += 24;
   }
 
-  // moon arc spans 18 → 30 (12 hours)
-  const progress = (hours - SUNSET) / 12;
+
+  const progress = (hours - SUNSET) / Nightlight;
   const visible_m = progress >= 0 && progress <= 1; //only visible when between the hours of 1800 and 2359 or 0000 and 0600
 
   const t = Math.max(0, Math.min(1, progress));
@@ -162,12 +166,12 @@ function getSkyColor(hours) {
 
 // --- font color based on time ---
 function getFontColor(hours){
-  if (hours > 18 || hours < 6) return FONT_COLORS.night;
+  if (hours > SUNSET || hours < SUNRISE) return FONT_COLORS.night;
   return FONT_COLORS.day;
 }
 
 function getGlowColor(hours){
-  if (hours > 18 || hours < 6) return GLOW_COLORS.night;
+  if (hours > SUNSET || hours < SUNRISE) return GLOW_COLORS.night;
   return GLOW_COLORS.day;
 }
 
@@ -219,6 +223,7 @@ function DayNightCycle() {
   const root = document.documentElement;
   root.style.setProperty('--nav-font-color', `rgb(${fontCol.r}, ${fontCol.g}, ${fontCol.b})`);
   root.style.setProperty('--nav-glow-color', `rgb(${glowCol.r}, ${glowCol.g}, ${glowCol.b})`);
+  root.style.setProperty('--text-color-rgb', `${fontCol.r}, ${fontCol.g}, ${fontCol.b}`);
 
 
 }
@@ -235,10 +240,47 @@ function DayNightCycle() {
     lastScroll = current;
   });
 
-window.addEventListener("load", () => {
+async function getSunTimes(lat, lng) {
+  const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD in local time
+  const cacheKey = `sunTimes_${today}`;
+  const cached = localStorage.getItem(cacheKey);
+  if (cached) return JSON.parse(cached);
+
+  const url = `https://api.sunrise-sunset.org/json?lat=${lat}&lng=${lng}&formatted=0&date=${today}`;
+  const response = await fetch(url);
+  const data = await response.json();
+  localStorage.setItem(cacheKey, JSON.stringify(data.results));
+  return data.results;
+}
+
+function startCycle() {
   DayNightCycle();
-  // Update every second so the sun glides smoothly (CSS transition handles the motion)
   setInterval(DayNightCycle, 1000);
+}
+
+window.addEventListener("load", () => {
+  navigator.geolocation.getCurrentPosition(
+    async (position) => {
+      try {
+        const { latitude, longitude } = position.coords;
+        const times = await getSunTimes(latitude, longitude);
+        console.log("sun rise on may 5th:");
+        console.log(new Date(times.sunrise));
+        console.log(times.sunrise);
+        console.log("sunset");
+        console.log(times.sunset);
+        SUNRISE = new Date(times.sunrise).getHours() + new Date(times.sunrise).getMinutes() / 60;
+        SUNSET  = new Date(times.sunset).getHours()  + new Date(times.sunset).getMinutes()  / 60;
+      } catch {
+        // fetch failed, keep defaults
+      }
+      startCycle();
+    },
+    () => {
+      // user denied location, keep defaults
+      startCycle();
+    }
+  );
 });
 
 

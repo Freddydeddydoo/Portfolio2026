@@ -27,14 +27,14 @@
 
   /* navbar glow
     only here for anyone else to know what color I used
-    doesn't do anything lol
+    doesn't do anything lol -> see --nav-glow-color or whatever
   */
   --night-glow: rgb(255,255,255);
   --morning-glow: rgb(100, 140, 190);
 
   /*
   hex colors for the moon
-  Separate varaiable cause what if I wanted to change it?
+  Separate varaiables cause what if I wanted to change it?
   */
 
   /* light side of the moon */
@@ -44,13 +44,26 @@
 
   --Mdark : rgb(38, 40, 64);
 
-
-
+  /* set by JS each tick; daytime Twilight as fallback */
+  --text-color-rgb: 62, 98, 148;
 }
 
 section {
   position: relative;
   z-index: 1;
+}
+
+section h1, section h2, section h3 {
+  color: rgba(var(--text-color-rgb), 1);
+}
+
+section p, section li, section span {
+  color: rgba(var(--text-color-rgb), 0.75);
+}
+
+section a {
+  color: rgba(var(--text-color-rgb), 1);
+  font-weight: 600;
 }
 
 
@@ -61,6 +74,79 @@ body{
   background-color: var(--Morning);
   transition: background-color 2s ease;
 }
+
+nav{
+ display: flex;
+ gap: 2rem;
+ padding: 1rem 2rem;
+ font-size: x-large;
+ height: 35px;
+ position: relative;
+ z-index: 1000;
+}
+
+
+nav a:first-child{
+  margin-right: auto;
+}
+
+nav a {
+  color: var(--nav-font-color);
+  text-decoration: none;
+  font-weight: 600;
+  position: relative;
+}
+
+
+nav a::after{
+  content: '';
+  position: absolute;
+  left: 0%;
+  top: 100%;
+  height: 1px;
+  width: 100%;
+  background: var(--nav-glow-color);
+}
+
+nav a:hover::after{
+  box-shadow: 0 0 5px 3px var(--nav-glow-color);
+  height: 0%;
+}
+
+nav a:active::after{
+  left: 25%;
+  width: 50%;
+}
+
+
+#hero{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+
+.hero-content{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: x-large;
+  height: 90vh;
+  width: 90vw;
+  
+  /* background-color: rgba(255, 255,255, 0.5);
+  border: 3px solid var(--nav-glow-color);
+  border-radius: 1%; */
+  padding: 1rem;
+
+
+}
+
+
+/* CSS ART STUFF */
 
 .sun {
   position: fixed;
@@ -183,47 +269,5 @@ body{
 
 }
 
-nav{
- display: flex;
- gap: 2rem;
- padding: 1rem 2rem;
- font-size: x-large;
- height: 35px;
+/*  CSS ART STUFF */
 
-}
-
-
-nav a:first-child{
-  margin-right: auto;
-}
-
-nav a {
-  color: var(--nav-font-color);
-  text-decoration: none;
-  font-weight: 600;
-  position: relative;
-}
-
-
-nav a::after{
-  content: '';
-  position: absolute;
-  left: 0%;
-  top: 100%;
-  height: 1px;
-  width: 100%;
-  background: var(--nav-glow-color);
-}
-
-nav a:hover::after{
-  box-shadow: 0 0 5px 3px var(--nav-glow-color);
-  height: 0%;
-}
-
-nav a:active{
-  width: 50%;
-}
-nav a:active::after{
-  left: 25%;
-  width: 50%;
-}
