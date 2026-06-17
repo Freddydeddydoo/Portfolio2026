@@ -44,13 +44,15 @@
 
   --Mdark : rgb(38, 40, 64);
 
-  /* set by JS each tick; daytime Twilight as fallback */
-  --text-color-rgb: 62, 98, 148;
+  /* set by JS each tick; daytime values as fallback */
+  --text-color-rgb: 20, 22, 25;
+  --nav-font-color: rgb(20, 22, 25);
+  --nav-glow-color: rgb(100, 140, 190);
 }
 
 section {
   position: relative;
-  z-index: 1;
+  z-index: 10;
 }
 
 section h1, section h2, section h3 {
@@ -124,7 +126,7 @@ nav a:active::after{
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  height: calc(100vh - 67px);
 }
 
 
@@ -134,7 +136,7 @@ nav a:active::after{
   justify-content: center;
   align-items: center;
   font-size: x-large;
-  height: 90vh;
+  height: calc(90vh - 35px);
   width: 90vw;
   
   /* background-color: rgba(255, 255,255, 0.5);
@@ -142,8 +144,11 @@ nav a:active::after{
   border-radius: 1%; */
   padding: 1rem;
 
-
 }
+
+.hero-content h1 { animation: fadeUp 1.0s ease 1.2s forwards; opacity: 0; }
+.hero-content p  { animation: fadeUp 1.0s ease 1.5s forwards; opacity: 0; }
+.hero-content a  { animation: fadeUp 1.0s ease 1.8s forwards; opacity: 0; }
 
 
 /* CSS ART STUFF */
@@ -188,16 +193,17 @@ nav a:active::after{
   filter: drop-shadow(0 0 10px rgba(248, 200, 95, 0.7));
 }
 
-.ray:nth-child(1) {animation-delay: 0s,  0s;}
-.ray:nth-child(2) {animation-delay: -2s, 0s;}
-.ray:nth-child(3) {animation-delay: -4s, 0s;}
-.ray:nth-child(4) {animation-delay: -6s, 0s;}
 
 @keyframes spin {
   from {
     transform: rotate(0deg);
   }
   to {transform: rotate(360deg);}
+}
+
+@keyframes fadeUp {
+  from{opacity: 0; transform: translateY(20px);}
+  to{opacity: 1; transform: translateY(0);}
 }
 
 .moon-full{
@@ -270,4 +276,3 @@ nav a:active::after{
 }
 
 /*  CSS ART STUFF */
-
