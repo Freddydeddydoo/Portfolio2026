@@ -358,4 +358,8 @@ window.addEventListener("load", () => {
   );
 });
 
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => e.target.classList.toggle('visible', e.isIntersecting));
+}, { threshold: 0.2 });
 
+document.querySelectorAll('section:not(#hero)').forEach(s => observer.observe(s));

@@ -55,6 +55,15 @@ section {
   z-index: 10;
 }
 
+section:not(#hero) {
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+section.visible {
+  opacity: 1;
+}
+
 section h1, section h2, section h3 {
   color: rgba(var(--text-color-rgb), 1);
 }
