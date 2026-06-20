@@ -63,6 +63,11 @@ const GLOW_COLORS = {
   night: { r: 255, g: 255, b: 255 },  // --night-glow
 }
 
+const TOOL_COLORS = {
+  day: {r: 255, g: 255, b: 255},
+  night: {r: 232, g: 238, b: 245},
+}
+
 //moon
 const moonEl = document.createElement('div');
 moonEl.classList.add('moon-full');
@@ -74,6 +79,16 @@ const moonC_2 = document.createElement('div');
 moonC_2.classList.add('mooncrater-2-full');
 const moonC_3 = document.createElement('div');
 moonC_3.classList.add('mooncrater-3-full');
+
+const moonToolTip = document.createElement('div');
+moonToolTip.classList.add('celestial-tooltip');
+const moonTxtbox1 = document.createElement('p');
+const moonTxtbox2 = document.createElement('p');
+moonTxtbox1.textContent = `The moon's position reflects your real local time.`;
+moonTxtbox2.textContent = `If location is enabled, it follows its actual arc across your sky!`;
+moonToolTip.appendChild(moonTxtbox1);
+moonToolTip.appendChild(moonTxtbox2);
+moonEl.appendChild(moonToolTip);
 
 
 moonEl.appendChild(moonC_1);
@@ -162,16 +177,32 @@ function getMoonPosition(){
 
 
 // --- Sky color based on time ---
+
+// Claude worked wonders here
 function getSkyColor(hours) {
-  // Divide the day into segments and lerp between your palette colors
-  let NOON = (SUNRISE + SUNSET) / 2;
-  let MIDNIGHT = (SUNSET + 24 + SUNRISE) / 2  - 24;
-  if (hours < SUNRISE - 1)  return SKY_COLORS.midnight;                                       // deep night
-  if (hours < SUNRISE + 1)  return lerpColor(SKY_COLORS.midnight,  SKY_COLORS.morning,  (hours - 5)  / 2);  // pre-dawn → morning
-  if (hours < NOON) return lerpColor(SKY_COLORS.morning,   SKY_COLORS.midday,   (hours - 7)  / NOON);  // morning → noon
-  if (hours < SUNSET) return lerpColor(SKY_COLORS.midday,    SKY_COLORS.twilight, (hours - 12) / 5);  // noon → twilight
-  if (hours < (SUNSET + 24)/ 2) return lerpColor(SKY_COLORS.twilight,  SKY_COLORS.midnight, (hours - 17) / 3);  // dusk → night
+  const NOON = (SUNRISE + SUNSET) / 2;
+
+  const stops = [
+    { t:  0,       color: SKY_COLORS.midnight },
+    { t: SUNRISE,  color: SKY_COLORS.morning  },
+    { t: NOON,     color: SKY_COLORS.midday   },
+    { t: SUNSET,   color: SKY_COLORS.twilight },
+    { t: 24,       color: SKY_COLORS.midnight },
+  ];
+
+  for (let i = 0; i < stops.length - 1; i++) {
+    const a = stops[i], b = stops[i + 1];
+    if (hours >= a.t && hours <= b.t) {
+      return lerpColor(a.color, b.color, (hours - a.t) / (b.t - a.t));
+    }
+  }
+
   return SKY_COLORS.midnight;
+}
+
+function getToolTipColor(hours){
+  if (hours > SUNSET || hours < SUNRISE) return TOOL_COLORS.night;
+  return TOOL_COLORS.day;
 }
 
 // --- font color based on time ---
@@ -204,6 +235,37 @@ for(let i = 0; i < 4; i++){
   sunEl.appendChild(ray);
 }
 
+const sunToolTip = document.createElement('div');
+sunToolTip.classList.add('celestial-tooltip');
+const celestialTxtbox1 = document.createElement('p');
+const celestialTxtbox2 = document.createElement('p');
+celestialTxtbox1.textContent = `The sun's position reflects your real local time.`;
+celestialTxtbox2.textContent = `If location is enabled, it follows its actual arc across your sky!`;
+sunToolTip.appendChild(celestialTxtbox1);
+sunToolTip.appendChild(celestialTxtbox2);
+sunEl.appendChild(sunToolTip);
+
+sunEl.addEventListener('mouseenter', () => {
+  const sunRect  = sunEl.getBoundingClientRect();
+  const tipWidth = sunToolTip.offsetWidth;
+  const margin   = 8;
+  const sunCenterX = sunRect.left + sunRect.width / 2;
+
+  // Default: center tooltip over the sun
+  let tipLeft = sunCenterX - tipWidth / 2;
+
+  // Clamp to viewport edges
+  tipLeft = Math.max(margin, Math.min(tipLeft, window.innerWidth - tipWidth - margin));
+
+  // Position tooltip in viewport coords, then offset relative to sun's left
+  sunToolTip.style.left      = `${tipLeft - sunRect.left}px`;
+  sunToolTip.style.transform = 'none';
+
+  // Keep arrow pointing at the sun center
+  const arrowLeft = sunCenterX - tipLeft;
+  sunToolTip.style.setProperty('--arrow-left', `${arrowLeft}px`);
+});
+
 document.body.appendChild(sunEl);
 
 // Persist a fixed epoch in sessionStorage so the spin animation stays in sync
@@ -214,6 +276,8 @@ if (!sessionStorage.getItem('animEpoch')) {
 const ANIM_EPOCH = parseInt(sessionStorage.getItem('animEpoch'));
 const RAY_OFFSETS = [0, 2, 4, 6]; // matches the original staggered delays (seconds)
 
+
+//CLaude Slop, will try to fix this myself lol 
 function resyncRays() {
   const elapsed = (Date.now() - ANIM_EPOCH) / 1000;
   sunEl.querySelectorAll('.ray').forEach((ray, i) => {
@@ -251,6 +315,7 @@ function DayNightCycle() {
   sunEl.style.left    = `${W / 2 - Math.cos(sunAngle) * xRadius}px`;
   sunEl.style.top     = `${horizonY - Math.sin(sunAngle) * yRadius}px`;
   sunEl.style.opacity = visible_s ? '1' : '0';
+  console.log(visible_m)
 
   // Move the moon along the arc
   currentMoonProgress = lerp(currentMoonProgress, targetMoonProgress, 0.05);
@@ -264,10 +329,15 @@ function DayNightCycle() {
   const sky = getSkyColor(hours);
   document.body.style.backgroundColor = `rgb(${sky.r}, ${sky.g}, ${sky.b})`;
 
+  const root = document.documentElement;
+
+  // Shift tooltip color
+  const tooltip = getToolTipColor(hours);
+  root.style.setProperty('--tooltip-color', `rgb(${tooltip.r}, ${tooltip.g}, ${tooltip.b})`);
+
   // Shift nav font and glow colors
   const fontCol = getFontColor(hours);
   const glowCol = getGlowColor(hours);
-  const root = document.documentElement;
   root.style.setProperty('--nav-font-color', `rgb(${fontCol.r}, ${fontCol.g}, ${fontCol.b})`);
   root.style.setProperty('--nav-glow-color', `rgb(${glowCol.r}, ${glowCol.g}, ${glowCol.b})`);
   root.style.setProperty('--text-color-rgb', `${fontCol.r}, ${fontCol.g}, ${fontCol.b}`);
@@ -333,22 +403,13 @@ window.addEventListener("load", () => {
       try {
         const { latitude, longitude } = position.coords;
         const times = await getSunTimes(latitude, longitude);
-        console.log("sun rise on may 5th:");
-        console.log(new Date(times.sunrise));
-        console.log("sunset");
-        console.log(new Date(times.sunset));
         SUNRISE = new Date(times.sunrise).getHours() + new Date(times.sunrise).getMinutes() / 60;
         SUNSET  = new Date(times.sunset).getHours()  + new Date(times.sunset).getMinutes()  / 60;
         Daylight = SUNSET - SUNRISE;
-        Nightlight = 24 - Daylight; 
-      } catch {
-        // fetch failed, keep defaults
-        console.log("sun rise on may 5th:");
-        console.log(new Date(times.sunrise));
-        console.log("sunset");
-        console.log(new Date(times.sunset));
+        Nightlight = 24 - Daylight;
+      } catch (e) {
+        console.warn("Failed to fetch sun times, keeping defaults:", e);
       }
-      //lerp the position of the sun and moon such that it doesn't automatically go to that position
       startCycle();
     },
     () => {
