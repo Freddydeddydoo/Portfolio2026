@@ -28,6 +28,24 @@ function lerpColor(c1, c2, t) {
   };
 }
 
+//fixing the coupling between js and css: RGB helper
+function getRGBValues(element, property){
+
+  const computedColor = window.getComputedStyle(element).getPropertyValue(property);
+
+  const rgbValues = computedColor.match(/[\d.]+/g);
+
+  if(!rgbValues) return null;
+
+  return {
+    r: parseInt(rgbValues[0], 10),
+    g: parseInt(rgbValues[1], 10),
+    b: parseInt(rgbValues[2], 10),
+    a: rgbValues[3] ? parseFloat(rgbValues[3]) : 1.0 // Default alpha to 1 if not present
+    };
+}
+
+
 // --- Time of day constants ---
 let SUNRISE = 6;   // 6:00 AM
 let SUNSET  = 18;  // 6:00 PM
@@ -47,24 +65,24 @@ let currentMoonProgress = 0;
 
 // Sky colors at each phase (matching your CSS vars)
 const SKY_COLORS = {
-  morning:  { r: 208, g: 255, b: 196 },  // --Morning
-  midday:   { r: 161, g: 217, b: 158 },  // --Midday
-  twilight: { r: 62,  g: 98,  b: 148 },  // --Twilight
-  midnight: { r: 38,  g: 40,  b: 64  },  // --Midnight  (#262840)
+  morning:  getRGBValues(document.documentElement, '--Morning'),
+  midday:   getRGBValues(document.documentElement, '--Midday'),
+  twilight: getRGBValues(document.documentElement, '--Twilight'),
+  midnight: getRGBValues(document.documentElement, '--Midnight'),
 };
 
 const FONT_COLORS = {
-  day:   { r: 20,  g: 22,  b: 25 },  //  color that chat told me to use LOL
-  night: { r: 208, g: 255, b: 196 },  // --Morning
+  day:   getRGBValues(document.documentElement, '--nav-font-color'),  //  color that chat told me to use LOL
+  night:  getRGBValues(document.documentElement, '--night-text'),  // --Morning
 }
 
 const GLOW_COLORS = {
-  day:   { r: 100, g: 140, b: 190  },  // --morning-glow
+  day:   getRGBValues(document.documentElement, '--nav-glow-color'),  // --morning-glow
   night: { r: 255, g: 255, b: 255 },  // --night-glow
 }
 
 const TOOL_COLORS = {
-  day: {r: 255, g: 255, b: 255},
+  day: getRGBValues(document.documentElement, '--tooltip-color'),
   night: {r: 232, g: 238, b: 245},
 }
 
@@ -183,8 +201,9 @@ function getSkyColor(hours) {
   const NOON = (SUNRISE + SUNSET) / 2;
 
   const stops = [
-    { t:  0,       color: SKY_COLORS.midnight },
-    { t: SUNRISE,  color: SKY_COLORS.morning  },
+    { t:  0,            color: SKY_COLORS.midnight },
+    { t: SUNRISE - 0.5, color: SKY_COLORS.midnight },
+    { t: SUNRISE,       color: SKY_COLORS.morning  },
     { t: NOON,     color: SKY_COLORS.midday   },
     { t: SUNSET,   color: SKY_COLORS.twilight },
     { t: 24,       color: SKY_COLORS.midnight },
@@ -214,6 +233,10 @@ function getFontColor(hours){
 function getGlowColor(hours){
   if (hours > SUNSET || hours < SUNRISE) return GLOW_COLORS.night;
   return GLOW_COLORS.day;
+}
+
+function getLuminance({ r, g, b }) {
+  return 0.299 * r + 0.587 * g + 0.114 * b;
 }
 
 // --- DOM setup ---
@@ -315,7 +338,7 @@ function DayNightCycle() {
   sunEl.style.left    = `${W / 2 - Math.cos(sunAngle) * xRadius}px`;
   sunEl.style.top     = `${horizonY - Math.sin(sunAngle) * yRadius}px`;
   sunEl.style.opacity = visible_s ? '1' : '0';
-  console.log(visible_m)
+  // console.log(visible_m)
 
   // Move the moon along the arc
   currentMoonProgress = lerp(currentMoonProgress, targetMoonProgress, 0.05);
@@ -323,7 +346,7 @@ function DayNightCycle() {
   moonEl.style.left    = `${W / 2 - Math.cos(moonAngle) * xRadius}px`;
   moonEl.style.top     = `${horizonY - Math.sin(moonAngle) * yRadius}px`;
   moonEl.style.opacity = visible_m ? '1' : '0';
-  console.log(visible_m);
+  // console.log(visible_m);
 
   // Shift sky color
   const sky = getSkyColor(hours);
@@ -336,7 +359,7 @@ function DayNightCycle() {
   root.style.setProperty('--tooltip-color', `rgb(${tooltip.r}, ${tooltip.g}, ${tooltip.b})`);
 
   // Shift nav font and glow colors
-  const fontCol = getFontColor(hours);
+  const fontCol = getLuminance(sky) > 140 ? FONT_COLORS.day : FONT_COLORS.night;
   const glowCol = getGlowColor(hours);
   root.style.setProperty('--nav-font-color', `rgb(${fontCol.r}, ${fontCol.g}, ${fontCol.b})`);
   root.style.setProperty('--nav-glow-color', `rgb(${glowCol.r}, ${glowCol.g}, ${glowCol.b})`);
