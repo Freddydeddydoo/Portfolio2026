@@ -219,6 +219,25 @@ function getSkyColor(hours) {
   return SKY_COLORS.midnight;
 }
 
+function getCustomSkyColors(animationDuration){
+
+  //animationDuration will be a set time, I.E 1 hour - converted to millisectionds
+  const start_time = Date.now();
+  const total_duration = animationDuration * 60 * 1000;
+  const t = M
+  const stops = [
+    { t:  0,            color: SKY_COLORS.midnight },
+    { t: SUNRISE - 0.5, color: SKY_COLORS.midnight },
+    { t: SUNRISE,       color: SKY_COLORS.morning  },
+    { t: NOON,     color: SKY_COLORS.midday   },
+    { t: SUNSET,   color: SKY_COLORS.twilight },
+    { t: 24,       color: SKY_COLORS.midnight },
+  ];
+
+
+
+}
+
 function getToolTipColor(hours){
   if (hours > SUNSET || hours < SUNRISE) return TOOL_COLORS.night;
   return TOOL_COLORS.day;
@@ -443,7 +462,19 @@ window.addEventListener("load", () => {
 });
 
 const observer = new IntersectionObserver((entries) => {
-  entries.forEach(e => e.target.classList.toggle('visible', e.isIntersecting));
-}, { threshold: 0.2 });
+  entries.forEach(entry => {
+    console.log(entry.target);
 
-document.querySelectorAll('section:not(#hero)').forEach(s => observer.observe(s));
+    if (entry.isIntersecting) {
+      entry.target.classList.add("show");
+    }else{
+      entry.target.classList.remove("show");
+    }
+  });
+}, {
+  threshold: 0.5
+});
+
+document.querySelectorAll("body section").forEach(section => {
+  observer.observe(section);
+});
