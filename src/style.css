@@ -212,7 +212,7 @@ nav a:not(a.homebutton):active::after{
   }
 
 .about-content {
-  width: min(200rem, 50%);
+  width: min(60rem, 100%);
   display: grid;
   grid-template-columns: 2fr 2fr 1fr;
   grid-template-rows: auto auto min-content;
@@ -364,6 +364,35 @@ nav a:not(a.homebutton):active::after{
   min-height: calc(100vh - 67px);
 }
 
+/* Mobile: stack the about boxes in one column instead of the box grid */
+@media (max-width: 700px) {
+  .about-content {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 1rem;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    grid-template-areas:
+      "box-2"
+      "box-1"
+      "box-4"
+      "box-3"
+      "box-5";
+  }
+
+  /* center the "About" heading */
+  .about-box:nth-child(2) {
+    align-items: center;
+    padding-bottom: 0;
+  }
+
+  /* keep the photo circular and centered */
+  .about-box:nth-child(1) {
+    width: 60%;
+    justify-self: center;
+  }
+}
+
 
 /* CSS ART STUFF */
 
@@ -484,11 +513,9 @@ nav a:not(a.homebutton):active::after{
   background: var(--Mdark);
 
    filter: drop-shadow(0 0 30px rgba(237, 247, 150, 0.4));
-
-  /* temp just to see it ! */
-  top: 50%;
-  left:75%;
 }
+
+
 
 
 .mooncrater-1-full{
