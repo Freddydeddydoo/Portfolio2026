@@ -50,6 +50,7 @@
   --night-text: rgb(208,255,196);
   --nav-glow-color: rgb(100, 140, 190);
   --tooltip-color:  rgba(255, 255, 255, 1);
+  --sky-color: 161, 217, 158;
 }
 
 body section {
@@ -200,16 +201,84 @@ nav a:not(a.homebutton):active::after{
   margin: 0;
 }
 
-  .social-link {
-    display: inline-flex;
-    align-items: center;
-    color: rgba(var(--text-color-rgb), 0.75);
-    transition: color 0.3s ease;
-  }
+.social-link { 
+  align-items: center;
+  color: rgba(var(--text-color-rgb), 0.75);
+  transition: color 0.3s ease;
+}
 
-  .social-link:hover {
+.social-link:hover {
     color: rgba(var(--text-color-rgb), 1);
-  }
+}
+
+
+.resume-link{
+  display: inline-flex;
+  align-items: center;         
+  gap: clamp(0.5rem, 2vw, 1rem);
+
+  box-sizing: border-box;
+  font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+  /* inverted colors: text color as the fill, sky color as the text (SVGs follow via currentColor) */
+  color: rgb(var(--sky-color));
+  background-color: rgb(var(--text-color-rgb));
+  padding: 0.5rem 1.5rem;
+  border-radius: 0.75rem;
+  text-decoration: none;
+    transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    transform 0.25s ease;
+}
+
+.resume-link > svg:first-child{
+  width: clamp(1.5rem, 3vw, 1.75rem);
+  height: auto;
+  flex-shrink: 0;
+}
+
+
+.resume-link:hover {
+  background-color: rgba(var(--text-color-rgb), 0.85);
+  transform: translateY(-3px);
+}
+
+/* browsers give <p> a 1em top/bottom margin by default;
+   color: inherit overrides the "body section p" text color so it stays visible on the button */
+.resume-link p {
+  margin: 0;
+  color: inherit;
+}
+
+.resume-text {
+  min-width: 0;
+}
+
+.resume-text h3 {
+  margin: 0;
+  color: rgb(var(--sky-color));
+  font-size: clamp(1rem, 1.8vw, 1.2rem);
+}
+
+.resume-text p {
+  margin: 0.35rem 0 0;
+  font-size: clamp(0.75rem, 1.2vw, 0.9rem);
+  color: rgb(var(--sky-color), 0.5);
+  opacity: 0.8;
+}
+
+.resume-arrow {
+  width: clamp(1.25rem, 2.5vw, 1.5rem);
+  height: auto;
+  flex-shrink: 0;
+}
+
+/* make the arrow svg fill its wrapper instead of using its own 24px size */
+.resume-arrow svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
 
 .about-content {
   width: min(60rem, 100%);
@@ -255,29 +324,22 @@ nav a:not(a.homebutton):active::after{
 }
 
 .about-box:nth-child(5){
+    display: inline-flex;
     flex-direction: row;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
     gap: 0.75rem;
-    padding: 1rem;
+    padding: 0;
+    overflow: visible;
+    /* base size for this box; the heading below scales off it */
+    font-size: clamp(0.85rem, 3.5vw, 1rem);
 }
 
-.about-box:nth-child(5) svg {
-    width: 32px;
-    height: 32px;
-    margin-left: 0.5rem;
+/* only the heading directly in the box, not the one inside the button */
+.about-box:nth-child(5) > h3 {
+    margin: 0;
+    font-size: 1.25em;
 }
-
-.about-box:nth-child(5) {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-}
-
-.about-box:nth-child(5) > :last-child {
-    margin-left: auto;
-}
-
 
 .skill-carousel::-webkit-scrollbar {
   display: none; 
@@ -384,6 +446,12 @@ nav a:not(a.homebutton):active::after{
   .about-box:nth-child(2) {
     align-items: center;
     padding-bottom: 0;
+  }
+
+  /* heading and resume button don't fit side by side; let the button drop below */
+  .about-box:nth-child(5) {
+    flex-wrap: wrap;
+    justify-content: center;
   }
 
   /* keep the photo circular and centered */

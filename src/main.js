@@ -372,6 +372,7 @@ function DayNightCycle() {
   document.body.style.backgroundColor = `rgb(${sky.r}, ${sky.g}, ${sky.b})`;
 
   const root = document.documentElement;
+  root.style.setProperty('--sky-color', `${sky.r}, ${sky.g}, ${sky.b}`);
 
   // Shift tooltip color
   const tooltip = getToolTipColor(hours);
