@@ -472,7 +472,7 @@ const observer = new IntersectionObserver((entries) => {
     }
   });
 }, {
-  threshold: 0.9
+  threshold: 0.4
 });
 
 document.querySelectorAll("body section").forEach(section => {
