@@ -51,6 +51,9 @@
   --nav-glow-color: rgb(100, 140, 190);
   --tooltip-color:  rgba(255, 255, 255, 1);
   --sky-color: 161, 217, 158;
+
+  /* navbar height; sections below subtract this so they fill the rest of the screen */
+  --nav-height: clamp(3rem, 10vw, 4.2rem);
 }
 
 body section {
@@ -84,6 +87,7 @@ body section a {
 
 body{
   min-height: 100vh;
+  z-index: 0;
   margin: 0;
   overflow: auto;
   background-color: var(--Morning);
@@ -91,14 +95,18 @@ body{
 }
 
 nav{
- display: flex;
- gap: 2rem;
- padding: 1rem 2rem;
- font-size: x-large;
- height: 35px;
- position: sticky;
- top: 0;
- z-index: 1000;
+  display: flex;
+  align-items: center;
+  /* clamp(min, preferred, max): shrinks on phones, caps on big screens */
+  gap: clamp(0.75rem, 3vw, 2rem);
+  padding: 0 clamp(1rem, 4vw, 2rem);
+  font-size: clamp(1rem, 4vw, 1.5rem);
+  height: var(--nav-height);
+  box-sizing: border-box;
+  position: sticky;
+  transition: top 0.3s;
+  top: 0;
+  z-index: 1000;
 }
 
 
@@ -111,6 +119,7 @@ nav a {
   text-decoration: none;
   font-weight: 600;
   position: relative;
+  white-space: nowrap;
 }
 
 a.homebutton {
@@ -165,7 +174,7 @@ nav a:not(a.homebutton):active::after{
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: calc(100vh - 67px);
+  height: calc(100vh - var(--nav-height));
 }
 
 
@@ -175,7 +184,7 @@ nav a:not(a.homebutton):active::after{
   justify-content: center;
   align-items: center;
   font-size: x-large;
-  height: calc(90vh - 35px);
+
   width: 90vw;
   
   /* background-color: rgba(255, 255,255, 0.5);
@@ -263,7 +272,7 @@ nav a:not(a.homebutton):active::after{
 .resume-text p {
   margin: 0.35rem 0 0;
   font-size: clamp(0.75rem, 1.2vw, 0.9rem);
-  color: rgb(var(--sky-color), 0.5);
+  color: rgb(var(--sky-color), 0.85);
   opacity: 0.8;
 }
 
@@ -423,7 +432,7 @@ nav a:not(a.homebutton):active::after{
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: calc(100vh - 67px);
+  min-height: calc(100vh - var(--nav-height));
 }
 
 /* Mobile: stack the about boxes in one column instead of the box grid */
@@ -470,7 +479,7 @@ nav a:not(a.homebutton):active::after{
   height: 60px;
   border-radius: 50%;
 
-  z-index: 11;
+  z-index: 0;
 
   background: rgba(255, 255, 255, 1);
   box-shadow:
@@ -565,7 +574,7 @@ nav a:not(a.homebutton):active::after{
   height: 60px;
   border-radius: 50%;
   background: var(--Mlight);
-  z-index: 11;
+  z-index: 0;
 
    filter: drop-shadow(0 0 30px rgba(237, 247, 150, 0.4));
 
@@ -593,7 +602,7 @@ nav a:not(a.homebutton):active::after{
   height: 10px;
   /* filter: drop-shadow(0 0 5px var(--Mcrater)); */
   border-radius: 50%;
-
+  z-index: 0;
   top: 15px;
   left: 10px;
 
@@ -606,7 +615,7 @@ nav a:not(a.homebutton):active::after{
   height: 8px;
   /* filter: drop-shadow(0 0 5px var(--Mcrater)); */
   border-radius: 50%;
-
+  z-index: 0;
   top: 30px;
   left: 8px;
 
@@ -619,7 +628,7 @@ nav a:not(a.homebutton):active::after{
   height: 6px;
   /* filter: drop-shadow(0 0 5px var(--Mcrater)); */
   border-radius: 50%;
-
+  z-index: 0;
   top: 30px;
   left: 18px;
 
